@@ -25,5 +25,12 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
+# DATABASES
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#databases
+# only mysql docker root user has permission to create database
+DATABASES = {"default": env.db("DATABASE_URL")}
+DATABASES["default"]["USER"] = "root"
+
 # Your stuff...
 # ------------------------------------------------------------------------------

@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 class CurrencyService:
     @staticmethod
     def get_available_currencies_symbols() -> tp.List[str]:
-        return CurrencySelector.get_available_currencies().values_list(
-            "symbol", flat=True
+        return list(
+            CurrencySelector.get_available_currencies().values_list("symbol", flat=True)
         )
 
     @staticmethod
@@ -43,10 +43,11 @@ class CurrencyService:
         permutations = CurrencyService.get_currencies_permutations(
             currencies=currencies
         )
+        currencies = {c.symbol: c for c in CurrencySelector.get_available_currencies()}
 
         for source, target in permutations:
             service = CurrencyRateService(
-                source_currency=source, target_currency=target
+                source_currency=currencies[source], target_currency=currencies[target]
             )
             created, updated = service.load_period(period=period)
             total_created += created
