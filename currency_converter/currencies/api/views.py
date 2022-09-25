@@ -1,3 +1,5 @@
+import typing as tp
+
 from django.db.models import Prefetch
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -5,6 +7,7 @@ from rest_framework import filters, mixins, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.serializers import BaseSerializer
 
 from currency_converter.currencies.api.serializers import (
     CurrencyExchangeViewSerializer,
@@ -37,11 +40,8 @@ class CurrencyExchangeView(GenericAPIView):
     serializer_class = CurrencyRateSerializer
 
     def get_rates(self, data):
-        qs = (
-            super()
-            .get_queryset()
-            .filter(source__symbol=data["source"], target__symbol=data["target"])
-        )
+        source, target = data["source_currency"], data["target_currency"]
+        qs = super().get_queryset().filter(source__symbol=source, target__symbol=target)
         if rate_date := data.get("rate_date"):
             qs = qs.filter(date=rate_date[0])
         return qs
@@ -57,13 +57,17 @@ class CurrencyExchangeView(GenericAPIView):
         ]
     )
     def get(self, request, source: str, target: str):
-        serializer = CurrencyExchangeViewSerializer(
-            data={**request.query_params, "source": source, "target": target}
+        input_serializer = CurrencyExchangeViewSerializer(
+            data={
+                **request.query_params,
+                "source_currency": source,
+                "target_currency": target,
+            }
         )
-        serializer.is_valid(raise_exception=True)
+        input_serializer.is_valid(raise_exception=True)
 
-        rate = self.get_rates(data=serializer.data).first()
+        rate = self.get_rates(data=input_serializer.data).first()
         if not rate:
             raise NotFound
-        serializer = self.get_serializer(rate)
+        serializer: BaseSerializer[tp.Any] = self.get_serializer(rate)
         return Response(serializer.data)

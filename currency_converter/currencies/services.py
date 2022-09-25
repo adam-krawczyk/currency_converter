@@ -55,7 +55,7 @@ class CurrencyService:
         return total_created, total_updated
 
     @staticmethod
-    def clean_currencies() -> tp.Dict:
+    def clean_currencies() -> tp.Tuple[int, tp.Dict[str, int]]:
         return (
             Currency.objects.annotate(rate_count=Count("rates"))
             .filter(rate_count=0)
