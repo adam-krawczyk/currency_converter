@@ -17,7 +17,9 @@ class Command(BaseCommand):
 
         service = CurrencyService()
         currencies = list(
-            service.get_or_generate_currencies(currencies=options["symbols"])
+            service.get_or_generate_currencies(
+                currencies=options["symbols"]
+            ).values_list("symbol", flat=True)
         )
         try:
             created, updated = service.load_currencies(
