@@ -164,13 +164,14 @@ CORS_URLS_REGEX = r"^/api/.*$"
 
 # By Default swagger ui is available only to admin user(s). You can change permission classes to change that
 # See more configuration options at https://drf-spectacular.readthedocs.io/en/latest/settings.html#settings
+ACTIVE_SERVERS = env.list("DJANGO_ACTIVE_SERVERS", default=[])
 SPECTACULAR_SETTINGS = {
     "TITLE": "Currency Converter API",
     "DESCRIPTION": "Documentation of API endpoints of currency converter",
     "SERVE_PERMISSIONS": [],
     "VERSION": "1.0.0",
     "SERVERS": [
-        {"url": "http://localhost:8000", "description": "Local Development server"},
+        {"url": f"{host}", "description": f"Server {host}"} for host in ACTIVE_SERVERS
     ],
 }
 

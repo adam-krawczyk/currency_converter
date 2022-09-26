@@ -89,4 +89,5 @@ class TestServiceCurrency:
         assert qs.count() == 3
         CurrencyService.clean_currencies()
         assert qs.count() == 1
-        assert qs.first().symbol == "EUR"
+        if item := qs.first():
+            assert item.symbol == "EUR"

@@ -67,7 +67,7 @@ For better quality before first work please enable pre-commit:
 
 Running type checks with mypy:
 
-    $ mypy
+    $ mypy currency_converter
 
 ### Running tests with pytest
 
@@ -80,6 +80,50 @@ The system is set up with reasonable defaults, including 404 logging and integra
 
 You must set the DSN url in production.
 
-## Deployment
+## Deployment production
+For running production please go to project path and run commands:
 
-Needs information
+    $ docker-compose -f production.yml build
+    $ docker-compose -f production.yml stop
+    $ docker-compose -f production.yml up -d
+
+App needs config in paths:
+- ./.envs/.production/.django
+
+```
+# General
+# ------------------------------------------------------------------------------
+DJANGO_SETTINGS_MODULE=config.settings.production
+ENABLE_ENDPOINT_DOC=1
+DJANGO_SECRET_KEY=
+DJANGO_ALLOWED_HOSTS=
+ACTIVE_SERVERS=
+SENTRY_DSN=
+
+# Redis
+# ------------------------------------------------------------------------------
+REDIS_URL=redis://redis:6379/0
+
+# Celery
+# ------------------------------------------------------------------------------
+CELERY_BROKER_URL=${REDIS_URL}
+```
+
+- ./.envs/.production/.mysql
+
+```
+MYSQL_HOST=mysql
+MYSQL_PORT=3306
+MYSQL_DATABASE=
+MYSQL_USER=
+MYSQL_PASSWORD=
+MYSQL_ROOT_PASSWORD=
+
+DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
+```
+
+
+### Fixing permission volume error
+
+    $ docker container exec -it -u root {container-id} /bin/sh
+    $ chown -R django.django public

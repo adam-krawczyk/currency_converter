@@ -1,0 +1,73 @@
+version: '3'
+
+volumes:
+  currency_converter_production_mysql_data: {}
+  currency_converter_production_public: {}
+
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: compose/production/django/Dockerfile
+    image: currency_converter_production_django
+    container_name: currency_converter_production_django
+    restart: always
+
+    depends_on:
+      - mysql
+    volumes:
+      - currency_converter_production_public:/app/public
+    env_file:
+      - ./.envs/.production/.django
+      - ./.envs/.production/.mysql
+    command: /start
+
+  celeryworker:
+    <<: *django
+    image: currency_converter_production_celeryworker
+    container_name: currency_converter_production_celeryworker
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+    ports: []
+    command: /start-celeryworker
+
+  celerybeat:
+    <<: *django
+    image: currency_converter_celerybeat
+    container_name: currency_converter_production_celerybeat
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+    ports: []
+    command: /start-celerybeat
+
+  mysql:
+    image: mysql:8.0
+    container_name: currency_converter_production_mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - currency_converter_production_mysql_data:/var/lib/mysql:Z
+    env_file:
+      - ./.envs/.production/.mysql
+
+  redis:
+    image: redis:6
+    container_name: currency_converter_production_redis
+    restart: always
+
+  nginx:
+    build:
+      context: ./compose/production/nginx
+      dockerfile: Dockerfile
+    container_name: currency_converter_production_nginx
+    volumes:
+      - currency_converter_production_public:/app/public
+    restart: always
+    depends_on:
+      - django
+    ports:
+      - "80:80"

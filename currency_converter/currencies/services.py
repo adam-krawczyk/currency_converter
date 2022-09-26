@@ -43,11 +43,14 @@ class CurrencyService:
         permutations = CurrencyService.get_currencies_permutations(
             currencies=currencies
         )
-        currencies = {c.symbol: c for c in CurrencySelector.get_available_currencies()}
+        currencies_map: tp.Dict[str, "currencies_models.Currency"] = {
+            c.symbol: c for c in CurrencySelector.get_available_currencies()
+        }
 
         for source, target in permutations:
             service = CurrencyRateService(
-                source_currency=currencies[source], target_currency=currencies[target]
+                source_currency=currencies_map[source],
+                target_currency=currencies_map[target],
             )
             created, updated = service.load_period(period=period)
             total_created += created
