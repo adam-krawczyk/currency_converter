@@ -16,7 +16,7 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.conf.beat_schedule = {
     "load_currency_rates": {
         "task": "currency_converter.currencies.tasks.load_currency_rates",
-        "schedule": timedelta(hours=1),
+        "schedule": timedelta(hours=4),
     },
 }
 app.conf.timezone = "UTC"
