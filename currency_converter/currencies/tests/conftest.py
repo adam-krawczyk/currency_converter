@@ -11,7 +11,7 @@ from currency_converter.currencies.tests.factories import (
 
 @pytest.fixture
 def currency_generator() -> tp.Callable:
-    def inner(*, symbol: str, open_rate: int, rate_number: int = 3):
+    def inner(*, symbol: str, open_rate: int = 0, rate_number: int = 3):
         currency = CurrencyFactory(symbol=symbol)
         now = timezone.now().date()
         CurrencyRateFactory.create_batch(
